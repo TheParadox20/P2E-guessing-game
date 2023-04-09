@@ -29,6 +29,7 @@ netowrks = [
 ]
 network=netowrks[1]
 web3 = Web3(Web3.HTTPProvider(network['api']))
+ownerPK = ''
 
 # create a Contract instance from the address and ABI
 contract = web3.eth.contract(address=contract_address, abi=contract_abi)
@@ -83,10 +84,12 @@ def getBet(id):
 def getContractBalance():
     return weiToEth(contract.functions.getContractBalance().call())
 
+def getBetAmount():
+    return weiToEth(contract.functions.getBetAmount().call())
 
 def placeBet(pk,sender_account,amount,id):
     nonce = web3.eth.getTransactionCount(sender_account)
-    transaction = contract.functions.placeBet(id).buildTransaction({
+    transaction = contract.functions.placeBet(id,int(guess)).buildTransaction({
         'from': sender_account,
         'value': web3.toWei(float(amount), 'ether'),
         'gas': 200000,
@@ -98,10 +101,27 @@ def placeBet(pk,sender_account,amount,id):
     tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
     return tx_receipt.transactionHash.hex()
 
-def closeBet(pk,sender_account,amount,id):
+def placeGuess(pk,sender_account,amount,id):
+    nonce = web3.eth.getTransactionCount(sender_account)
+    transaction = contract.functions.placeGuess(id,int(guess)).buildTransaction({
+        'from': sender_account,
+        'value': web3.toWei(float(amount), 'ether'),
+        'gas': 200000,
+        'gasPrice': web3.toWei('100', 'gwei'),
+        'nonce': nonce,
+    })
+    signed_txn = web3.eth.account.signTransaction(transaction, pk)
+    tx_hash = web3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+    return tx_receipt.transactionHash.hex()
+
+def closeBet(id,winner,mode):
+    """
+    if mode is single send amount to winner and delete bet
+    """
     nonce = web3.eth.getTransactionCount(sender_account)
     print(id,amount)
-    transaction = contract.functions.closeBet(id).buildTransaction({
+    transaction = contract.functions.closeBet(id,int(guess)).buildTransaction({
         'from': sender_account,
         'value': web3.toWei(float(amount), 'ether'),
         'gas': 200000,

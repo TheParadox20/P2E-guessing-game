@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { useNavigate, Link } from 'react-router-dom';
 import {baseURL} from './data.json'
-import Footer from "./footer";
+import { Link } from "react-router-dom";
+import ace from './assets/ace.png'
 
 export default function Login(props){
     let [username, setUsername] = useState('');
@@ -11,7 +11,6 @@ export default function Login(props){
     let [pk, setPK] = useState('');
     let [view, setView] = useState(true);
     let [iskey, setIsKey] = useState('create');
-    let navigate = useNavigate();
 
     let signup = async (e)=>{
         e.preventDefault();
@@ -57,7 +56,8 @@ export default function Login(props){
                     address: data.user.address,
                     name: data.user.username,
                 }));
-                navigate('/transact')
+                document.getElementById('ace').style.visibility = 'hidden';
+                document.getElementById('wallet').style.visibility = 'hidden';
             }else{
                 document.getElementById('wrong').style.visibility='visible';
                 document.getElementById('reset').style.visibility='visible';
@@ -67,13 +67,13 @@ export default function Login(props){
     }
 
     return(
-        <div className="">
+        <div className="white">
+            <img src={ace} alt="" />
             {
                 view?
-                <div id='login' className="flex items-center h-screen flex-col justify-center">
-                    <img src="" alt="" />
+                <div id='login' className="content white">
                     <p id="wrong" className="text-red-500 font-semibold text-md" style={{visibility:"hidden"}}>Incorrect Username or Password</p>
-                    <form className=" text-black white md:w-1/3 py-8 px-4 flex flex-col justify-center">
+                    <form className=" text-black md:w-1/3 py-8 px-4 flex flex-col justify-center">
                         <label className='block my-4' htmlFor="number">Username</label>
                         <input required className='block my-4 h-8 rounded-lg pl-4' placeholder="0791283746" value={username} onChange={event =>{setUsername(event.target.value)}}/>
                         <label className='block my-4' htmlFor="pass">Password</label>
@@ -84,8 +84,7 @@ export default function Login(props){
                     <p className="text-center">Don't have an account yet? <br /> <button onClick={(e)=>{setView(false)}} className="text-blue-500">Register an account</button></p>
                 </div>
                 :
-                <div id='signup' className="flex items-center h-screen flex-col justify-center">
-                    <img src="" alt="" />
+                <div id='signup' className="content white">
                     <form className=" text-black white md:w-1/3 py-8 px-4">
                         <label className='block my-4' htmlFor="number">Username</label>
                         <input required className='block my-4 h-8 rounded-lg pl-4' type="text" placeholder="Jane Doe" value={username} onChange={event =>{setUsername(event.target.value)}}/>
@@ -105,8 +104,6 @@ export default function Login(props){
                     <p className="text-center mt-4">Have an account? <br /> <button onClick={(e)=>{setView(true)}} className="text-blue-500">Login</button></p>
                 </div>
             }
-            <Footer/>
-            
         </div>
     )
 }

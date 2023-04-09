@@ -14,32 +14,42 @@ contract Guess{
     receive() payable external {}
     fallback() payable external {}
     struct Bet{
-        uint amount;
-        uint8 guess;
+        uint amount;//amount staked by creatoe
+        uint staked;//amount placed by staker
         address payable creator;
+        address payable staker;
     }
     mapping (string=>Bet) bets;
-    function placeBet(string memory betID, uint8 guess) public payable{
+    function placeBet(string calldata betID) public payable{
         /*
          * betID used to identify a bet
-         * amount to stake
         */
         Bet memory bet;
         bet.amount+=msg.value;
-        bet.guess = guess;
         bet.creator=payable(msg.sender);
         bets[betID]=bet;
-        
     }
-    function closeBet(string memory betID, uint8 guess) public payable{
+    function placeGuess(string calldata betID) public payable{
         Bet memory bet = bets[betID];
-        require(msg.value==bet.amount,"Must deposit an equal amount");
-        if(guess==bet.guess) payable(msg.sender).call{value : (msg.value+bet.amount)}(""); //if guess is correct send to person who guessed
-        else bet.creator.call{value : (msg.value+bet.amount)}(""); //else send to creator
-        delete bets[betID];
+        bet.amount=bet.amount+msg.value;
+        bet.staked=msg.value;
+        bet.staker=payable(msg.sender);
+        bets[betID]=bet;
     }
-    function getBetAmount(string memory betID) public view returns(uint amount){
+    function getBet(string calldata betID) public view returns(Bet memory bet){
+        bet = bets[betID];
+    }
+    function closeBet(string calldata betID,bool winner,bool delet) public payable{
+        require(msg.sender==owner,"Only owner can close bet");
         Bet memory bet = bets[betID];
-        amount = bet.amount;
+        if (winner) bet.staker.call{value : (bet.amount)}("");
+        else bet.creator.call{value : (delet?bet.amount:bet.staked)}("");
+        if (delet) delete bets[betID];
+        else{
+            bet.amount=bet.amount-bet.staked;
+            bet.staked=0;
+            bet.staker=payable(address(0));
+            bets[betID]=bet;
+        }
     }
 }

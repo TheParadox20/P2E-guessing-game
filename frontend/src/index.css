@@ -30,7 +30,7 @@ body{
     color: white;
     font-weight: 400;
 }
-#user{
+#user,#wallet,#ace{
     visibility: hidden;
 }
 .content{
